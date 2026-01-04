@@ -3,7 +3,18 @@
  */
 import type { WebSocketMessage } from '../types';
 
-const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:8000/ws';
+// Derive WebSocket URL from API URL
+const getWsUrl = () => {
+  const apiUrl = import.meta.env.VITE_API_URL;
+  if (apiUrl) {
+    // Convert http(s):// to ws(s)://
+    const wsUrl = apiUrl.replace(/^http/, 'ws').replace(/\/api$/, '');
+    return `${wsUrl}/ws`;
+  }
+  return 'ws://localhost:8000/ws';
+};
+
+const WS_URL = getWsUrl();
 
 type MessageHandler = (message: WebSocketMessage) => void;
 

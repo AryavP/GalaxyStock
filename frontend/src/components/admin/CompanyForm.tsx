@@ -26,7 +26,8 @@ export const CompanyForm: React.FC<CompanyFormProps> = ({ onSuccess }) => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('http://localhost:8000/admin/companies', {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const response = await fetch(`${API_URL}/admin/companies`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

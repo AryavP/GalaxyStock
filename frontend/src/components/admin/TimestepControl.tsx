@@ -28,7 +28,8 @@ export const TimestepControl: React.FC<TimestepControlProps> = ({ onComplete }) 
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:8000/admin/timestep/preview', {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const response = await fetch(`${API_URL}/admin/timestep/preview`, {
         headers: { 'X-Admin-Password': adminAuth.getPassword()! }
       });
 
@@ -60,7 +61,8 @@ export const TimestepControl: React.FC<TimestepControlProps> = ({ onComplete }) 
         }
       });
 
-      const response = await fetch('http://localhost:8000/admin/timestep/generate', {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const response = await fetch(`${API_URL}/admin/timestep/generate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

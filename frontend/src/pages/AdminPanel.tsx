@@ -48,7 +48,8 @@ export const AdminPanel: React.FC = () => {
 
   const loadCompanies = async () => {
     try {
-      const response = await fetch('http://localhost:8000/admin/companies', {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const response = await fetch(`${API_URL}/admin/companies`, {
         headers: { 'X-Admin-Password': adminAuth.getPassword()! }
       });
 
@@ -65,7 +66,8 @@ export const AdminPanel: React.FC = () => {
 
   const loadPlayers = async () => {
     try {
-      const response = await fetch('http://localhost:8000/admin/players', {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const response = await fetch(`${API_URL}/admin/players`, {
         headers: { 'X-Admin-Password': adminAuth.getPassword()! }
       });
 
@@ -91,7 +93,8 @@ export const AdminPanel: React.FC = () => {
 
   const handleSave = async (symbol: string) => {
     try {
-      const response = await fetch(`http://localhost:8000/admin/companies/${symbol}`, {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const response = await fetch(`${API_URL}/admin/companies/${symbol}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -118,7 +121,8 @@ export const AdminPanel: React.FC = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:8000/admin/companies/${symbol}`, {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const response = await fetch(`${API_URL}/admin/companies/${symbol}`, {
         method: 'DELETE',
         headers: { 'X-Admin-Password': adminAuth.getPassword()! }
       });
