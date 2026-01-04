@@ -450,3 +450,67 @@ async def get_player_stats(_: bool = Depends(verify_admin)):
     logger.info(f"Admin: Returning stats for {len(players)} players")
 
     return {"players": players}
+
+
+# Market reset endpoint
+@router.post("/reset-market")
+async def reset_market(_: bool = Depends(verify_admin)):
+    """Reset the market to timestep 0 with initial prices.
+
+    WARNING: This deletes ALL market data including:
+    - All stock prices
+    - All transactions
+    - All portfolio holdings
+
+    Returns:
+        Success message with reset details
+    """
+    logger.warning("Admin: Resetting market - THIS WILL DELETE ALL DATA")
+
+    db = get_db()
+    market = get_market()
+
+    # Delete all data
+    with db.get_connection() as conn:
+        cursor = conn.cursor()
+
+        # Delete all stock prices
+        cursor.execute("DELETE FROM stock_prices")
+        deleted_prices = cursor.rowcount
+
+        # Delete all transactions
+        cursor.execute("DELETE FROM transactions")
+        deleted_transactions = cursor.rowcount
+
+        # Delete all portfolio holdings
+        cursor.execute("DELETE FROM portfolios")
+        deleted_holdings = cursor.rowcount
+
+        # Reset market state to timestep 0
+        cursor.execute(
+            "UPDATE market_state SET current_timestep = 0, last_updated = ?",
+            (datetime.now(),)
+        )
+
+        conn.commit()
+
+    logger.info(
+        f"Admin: Deleted {deleted_prices} prices, {deleted_transactions} transactions, "
+        f"{deleted_holdings} holdings"
+    )
+
+    # Reinitialize market with starting prices
+    market.initialize_market()
+
+    logger.info("Admin: Market reset complete")
+
+    return {
+        "message": "Market reset successfully",
+        "timestep": 0,
+        "companies_initialized": len(market.companies),
+        "deleted": {
+            "prices": deleted_prices,
+            "transactions": deleted_transactions,
+            "holdings": deleted_holdings
+        }
+    }
