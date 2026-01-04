@@ -4,7 +4,7 @@
     "name": "Apollo ISR",
     "initial_price": 3210.0,
     "trend": 0.0175,
-    "volatility": 0.0213,
+    "volatility": 0.0313,
     "description": "Mega Corp/Ship Registry - One of, if not the most powerful corporations in the Galaxy. Specializing in ship registration, tracking, manufacturing, and R&D. Apollo ISR is a long-standing, impartial, third-party galactic organization that manages all data related to the massive number of starships present in the galaxy"
   },
   {
@@ -12,7 +12,7 @@
     "name": "Dolis Cybernetics",
     "initial_price": 950.0,
     "trend": 0.0037,
-    "volatility": 0.006,
+    "volatility": 0.04,
     "description": "Droid Manufacturer - Once the leading droid and android manufacturer in the galaxy, they were the only company to maintain an independent contract with the Incorporated Ameristanian Republic during the reign of the Dread Emperor Augustus Jeffs Albert. They are most known as the creators of the S.M.I.L.E Bots (Singularity Motivated Intelligence Locus Type E)"
   },
   {
@@ -20,7 +20,7 @@
     "name": "Sa\u2019rai Merchant Corporation",
     "initial_price": 238.0,
     "trend": -0.0019,
-    "volatility": 0.004699999999999999,
+    "volatility": 0.03,
     "description": "Trade Conglomerate - Known to most of the civilized Multiverse as The Merchants, the Sa'rai are a private, non-affiliated fleet of ships that carries imports and exports during times of peace, but may become a spacefaring auxiliary to its chosen faction during wartime, delivering troops (including many Sa'rai sailors), supplies and munitions between systems. The Merchants are a worker-owned operation, with management, mechanics, maintenance and crewmembers receiving shares in both the company and in individual hauls."
   },
   {
@@ -28,7 +28,7 @@
     "name": "Wethern-Bancroft Genomics",
     "initial_price": 392.0,
     "trend": -0.0015,
-    "volatility": 0.011200000000000002,
+    "volatility": 0.03,
     "description": "Body Augmentations Manufacturer - A small Body Augmentation company known as one of the leading non Arcadian implant manufacterors"
   },
   {
@@ -36,7 +36,7 @@
     "name": "Technomancer Inc.",
     "initial_price": 420.0,
     "trend": 0.0039000000000000003,
-    "volatility": 0.0023,
+    "volatility": 0.025,
     "description": "Cybernetic Implant Manufacrurer - A body enhancement company, focusing on neural implants that expand mental processes by ostensibly hooking your brain up to microchipped ram and data storage. They are most famous for their line of Aarcane \u2122 implants, implants that allow the user to remotely access unencrypted data through directly streamed into their internal data systems, then easily accessible by their higher brain functions."
   },
   {
@@ -44,7 +44,7 @@
     "name": "Kaleidoscope Kinetic Weapons",
     "initial_price": 612.0,
     "trend": 0.005,
-    "volatility": 0.0070999999999999995,
+    "volatility": 0.01,
     "description": "Weapons Manufacturer - They make good guns. Shoot far, big boom."
   },
   {
@@ -84,7 +84,7 @@
     "name": "Galactic Electric",
     "initial_price": 980.0,
     "trend": 0.0009,
-    "volatility": 0.0039000000000000003,
+    "volatility": 0.01,
     "description": "Power Company - A morally flexible energy conglomerate that specializes in harvesting \"alternative energy sources\"\u2014which often translates to \"things that definitely shouldn\u2019t be used as fuel.\""
   },
   {
@@ -92,7 +92,7 @@
     "name": "PreCog Commerce",
     "initial_price": 300.0,
     "trend": 0.0022,
-    "volatility": 0.0075,
+    "volatility": 0.009,
     "description": "Predictive AI & Data Exploitation - Overmind Analytics collects, analyzes, and monetizes everything. From consumer behavior to war predictions, they deal in pre-emptive decision-making."
   },
   {
@@ -100,7 +100,7 @@
     "name": "Aurora Geomantic Solution",
     "initial_price": 552.0,
     "trend": -0.023000000000000001,
-    "volatility": 0.013999999999999999,
+    "volatility": 0.03,
     "description": "Ethical Mining & Terraforming Consortium - Unlike most mining corporations that strip planets down to bare rock, AGS specializes in eco-friendly mineral extraction\u2014at least, that\u2019s what the brochures say. Their proprietary GeoWeave\u2122 tech supposedly restores planetary ecosystems while extracting rare elements, though results have varied (one planet grew an entirely new jungle, another collapsed into a methane swamp). Despite their shady scientific claims, AGS remains wildly popular with wealthy planets looking for a more PR-friendly approach to mining."
   },
   {
@@ -148,7 +148,7 @@
     "name": "Pretty Boy Shield and Accessories",
     "initial_price": 2.0,
     "trend": 0.01,
-    "volatility": 0.0049,
+    "volatility": 0.02,
     "description": "Combat Tech Manufacturer - A small Demeter based gear company - now repressented by Munk's Hunks"
   },
   {
@@ -156,7 +156,7 @@
     "name": "Wex and Sons Applied Armaments",
     "initial_price": 7.0,
     "trend": -0.0007000000000000001,
-    "volatility": 0.0032,
+    "volatility": 0.085,
     "description": "Weapons Manufacturing - A small Demeter based Weapons company"
   },
   {
@@ -244,7 +244,7 @@
     "name": "Fire Frank Fitz\u2019s Empire",
     "initial_price": 859.0,
     "trend": 0.0028000000000000004,
-    "volatility": 0.008,
+    "volatility": 0.07,
     "description": "Smuggling Empire - The Empire of the greatest pirate ever to cross the void. His empire has its hands in many different industries, but made its start smuggling \"illicit\" substances."
   },
   {
