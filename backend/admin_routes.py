@@ -333,6 +333,9 @@ async def generate_timestep(
     db = get_db()
     market = get_market()
 
+    # Reload market's in-memory company list to pick up any new companies
+    market.load_companies()
+
     # Get current market state
     market_state = db.get_market_state()
     next_timestep = market_state.current_timestep + 1
