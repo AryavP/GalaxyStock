@@ -254,5 +254,13 @@
     "trend": -0.1226,
     "volatility": 0.1577,
     "description": "Trade Conglomerate - General Exporter of Delphine locally maufactured products"
+  },
+  {
+    "symbol": "BVLG",
+    "name": "Bulk & Void Logistics",
+    "initial_price": 321.0,
+    "trend": -0.0026,
+    "volatility": 0.01577,
+    "description": "A low-profile megahauler and supply-chain manager that handles boring but essential goods: water, protein slurry, reactor parts, air filters."
   }
 ]
