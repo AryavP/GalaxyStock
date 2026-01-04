@@ -1,0 +1,749 @@
+# GALACTIC STOCKS ADMIN PANEL - SIMPLIFIED IMPLEMENTATION
+# For 6-person D&D campaign - Simple > Secure, Working > Perfect
+
+## OVERVIEW
+Replace Google Sheets with a basic admin panel. One password, JSON-based company config,
+simple timestep generation. No JWT, no audit logs, no enterprise BS. 3-4 hours to implement.
+
+## FILE CHANGES
+
+NEW FILES:
+/Users/aryavpal/Projects/GalacticStocks/backend/admin_routes.py
+/Users/aryavpal/Projects/GalacticStocks/backend/companies.json
+/Users/aryavpal/Projects/GalacticStocks/frontend/src/pages/AdminPanel.tsx
+/Users/aryavpal/Projects/GalacticStocks/frontend/src/components/admin/CompanyForm.tsx
+/Users/aryavpal/Projects/GalacticStocks/frontend/src/components/admin/TimestepControl.tsx
+
+MODIFIED FILES:
+/Users/aryavpal/Projects/GalacticStocks/backend/main.py (mount admin router)
+/Users/aryavpal/Projects/GalacticStocks/frontend/src/App.tsx (add admin route)
+
+## 1. SIMPLE AUTH - 10 LINES
+
+### backend/admin_routes.py
+```python
+from fastapi import APIRouter, HTTPException, Depends, Header
+from pydantic import BaseModel
+from typing import List, Optional
+import json
+import os
+
+router = APIRouter(prefix="/admin", tags=["admin"])
+
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "galacticstocks123")
+
+def verify_admin(x_admin_password: str = Header(None)):
+    if x_admin_password != ADMIN_PASSWORD:
+        raise HTTPException(status_code=401, detail="Invalid admin password")
+    return True
+
+@router.post("/verify")
+async def verify_password(password: str):
+    return {"authenticated": password == ADMIN_PASSWORD}
+```
+
+### Frontend auth check
+```typescript
+// frontend/src/utils/adminAuth.ts
+export const adminAuth = {
+  login: (password: string): boolean => {
+    if (password === "galacticstocks123") {  // Match backend
+      localStorage.setItem("adminPassword", password);
+      return true;
+    }
+    return false;
+  },
+
+  isAuthenticated: (): boolean => {
+    return localStorage.getItem("adminPassword") === "galacticstocks123";
+  },
+
+  getPassword: (): string | null => {
+    return localStorage.getItem("adminPassword");
+  },
+
+  logout: () => {
+    localStorage.removeItem("adminPassword");
+  }
+};
+```
+
+## 2. COMPANIES AS JSON
+
+### backend/companies.json
+```json
+[
+  {
+    "symbol": "GLXT",
+    "name": "Galactic Transport Inc",
+    "initial_price": 100.0,
+    "trend": 0.02,
+    "volatility": 0.15,
+    "description": "Leading interstellar cargo and passenger transport"
+  },
+  {
+    "symbol": "CYBER",
+    "name": "CyberTech Industries",
+    "initial_price": 50.0,
+    "trend": -0.01,
+    "volatility": 0.25,
+    "description": "Neural implants and cybernetic augmentation"
+  }
+]
+```
+
+### backend/admin_routes.py (add these endpoints)
+```python
+COMPANIES_FILE = "companies.json"
+
+def load_companies():
+    if not os.path.exists(COMPANIES_FILE):
+        return []
+    with open(COMPANIES_FILE, 'r') as f:
+        return json.load(f)
+
+def save_companies(companies):
+    with open(COMPANIES_FILE, 'w') as f:
+        json.dump(companies, f, indent=2)
+
+@router.get("/companies")
+async def get_companies(_: bool = Depends(verify_admin)):
+    return load_companies()
+
+@router.post("/companies")
+async def create_company(
+    symbol: str,
+    name: str,
+    initial_price: float,
+    trend: float,
+    volatility: float,
+    description: str = "",
+    _: bool = Depends(verify_admin)
+):
+    companies = load_companies()
+
+    # Check duplicate
+    if any(c["symbol"] == symbol.upper() for c in companies):
+        raise HTTPException(status_code=400, detail="Symbol already exists")
+
+    # Basic validation
+    if initial_price <= 0 or volatility <= 0:
+        raise HTTPException(status_code=400, detail="Price and volatility must be positive")
+
+    companies.append({
+        "symbol": symbol.upper(),
+        "name": name,
+        "initial_price": initial_price,
+        "trend": trend,
+        "volatility": volatility,
+        "description": description
+    })
+
+    save_companies(companies)
+    return {"message": "Company created", "symbol": symbol.upper()}
+
+@router.patch("/companies/{symbol}")
+async def update_company(
+    symbol: str,
+    trend: Optional[float] = None,
+    volatility: Optional[float] = None,
+    description: Optional[str] = None,
+    _: bool = Depends(verify_admin)
+):
+    companies = load_companies()
+    company = next((c for c in companies if c["symbol"] == symbol.upper()), None)
+
+    if not company:
+        raise HTTPException(status_code=404, detail="Company not found")
+
+    if trend is not None:
+        company["trend"] = trend
+    if volatility is not None:
+        if volatility <= 0:
+            raise HTTPException(status_code=400, detail="Volatility must be positive")
+        company["volatility"] = volatility
+    if description is not None:
+        company["description"] = description
+
+    save_companies(companies)
+    return {"message": "Company updated"}
+
+@router.delete("/companies/{symbol}")
+async def delete_company(symbol: str, _: bool = Depends(verify_admin)):
+    companies = load_companies()
+    companies = [c for c in companies if c["symbol"] != symbol.upper()]
+    save_companies(companies)
+    return {"message": "Company deleted"}
+```
+
+## 3. TIMESTEP GENERATION WITH OVERRIDES
+
+### backend/admin_routes.py (add dependency injection helpers)
+```python
+# Add to top of file after imports
+from database import Database
+from stock_simulator import StockMarket
+
+# These will be injected from main.py
+db_instance = None
+market_instance = None
+
+def get_db():
+    return db_instance
+
+def get_market():
+    return market_instance
+
+# Timestep endpoints
+@router.get("/timestep/preview")
+async def preview_timestep(_: bool = Depends(verify_admin)):
+    companies = load_companies()
+    db = get_db()
+    market = get_market()
+
+    previews = []
+    for company in companies:
+        current_price_obj = db.get_latest_price(company["symbol"])
+        current_price = current_price_obj.price if current_price_obj else company["initial_price"]
+
+        calculated_price = market.calculate_next_price(
+            company["symbol"],
+            company["trend"],
+            company["volatility"],
+            current_price
+        )
+
+        previews.append({
+            "symbol": company["symbol"],
+            "name": company["name"],
+            "current_price": current_price,
+            "calculated_price": calculated_price,
+            "change_pct": ((calculated_price - current_price) / current_price) * 100
+        })
+
+    return {"previews": previews}
+
+@router.post("/timestep/generate")
+async def generate_timestep(
+    overrides: dict[str, float] = {},
+    _: bool = Depends(verify_admin)
+):
+    companies = load_companies()
+    db = get_db()
+    market = get_market()
+
+    market_state = db.get_market_state()
+    next_timestep = market_state.current_timestep + 1
+
+    from models import StockPrice
+    from datetime import datetime
+
+    for company in companies:
+        current_price_obj = db.get_latest_price(company["symbol"])
+        current_price = current_price_obj.price if current_price_obj else company["initial_price"]
+
+        # Check for override, otherwise calculate
+        if company["symbol"] in overrides:
+            next_price = overrides[company["symbol"]]
+            is_override = True
+        else:
+            next_price = market.calculate_next_price(
+                company["symbol"],
+                company["trend"],
+                company["volatility"],
+                current_price
+            )
+            is_override = False
+
+        db.save_stock_price(StockPrice(
+            symbol=company["symbol"],
+            timestep=next_timestep,
+            price=next_price,
+            timestamp=datetime.now(),
+            is_override=is_override
+        ))
+
+    # Update market state
+    market_state.current_timestep = next_timestep
+    market_state.last_updated = datetime.now()
+    db.update_market_state(market_state)
+
+    return {"message": "Timestep generated", "timestep": next_timestep}
+```
+
+## 4. PLAYER STATS VIEW
+
+### backend/admin_routes.py (add player stats endpoint)
+```python
+@router.get("/players")
+async def get_player_stats(_: bool = Depends(verify_admin)):
+    db = get_db()
+
+    with db.get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT DISTINCT character_name FROM portfolios WHERE quantity > 0")
+        characters = [row['character_name'] for row in cursor.fetchall()]
+
+    players = []
+    for character in characters:
+        portfolio = db.get_portfolio(character)
+        players.append({
+            "character_name": character,
+            "total_value": portfolio.total_value,
+            "cost_basis": portfolio.total_cost_basis,
+            "profit_loss": portfolio.total_profit_loss,
+            "profit_loss_pct": portfolio.profit_loss_percentage,
+            "holdings": [
+                {
+                    "symbol": h.symbol,
+                    "quantity": h.quantity,
+                    "avg_price": h.avg_purchase_price,
+                    "current_value": h.current_value,
+                    "cost_basis": h.total_cost_basis,
+                    "profit_loss": h.profit_loss
+                }
+                for h in portfolio.holdings
+            ]
+        })
+
+    # Sort by profit/loss descending
+    players.sort(key=lambda p: p["profit_loss"], reverse=True)
+    return {"players": players}
+```
+
+## 5. BACKEND INTEGRATION
+
+### Modify backend/main.py
+```python
+# Add after imports
+from admin_routes import router as admin_router
+import admin_routes
+
+# In lifespan function, after market initialization:
+admin_routes.db_instance = db
+admin_routes.market_instance = market
+
+# Mount admin router before yield
+app.include_router(admin_router)
+```
+
+## 6. FRONTEND COMPONENTS
+
+### frontend/src/pages/AdminPanel.tsx
+```typescript
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { adminAuth } from '../utils/adminAuth';
+import { CompanyForm } from '../components/admin/CompanyForm';
+import { TimestepControl } from '../components/admin/TimestepControl';
+
+export const AdminPanel: React.FC = () => {
+  const navigate = useNavigate();
+  const [companies, setCompanies] = useState([]);
+  const [players, setPlayers] = useState([]);
+  const [editingSymbol, setEditingSymbol] = useState<string | null>(null);
+  const [editData, setEditData] = useState<any>({});
+
+  useEffect(() => {
+    if (!adminAuth.isAuthenticated()) {
+      navigate('/admin/login');
+      return;
+    }
+    loadCompanies();
+    loadPlayers();
+  }, [navigate]);
+
+  const loadCompanies = async () => {
+    const res = await fetch('http://localhost:8000/admin/companies', {
+      headers: { 'X-Admin-Password': adminAuth.getPassword()! }
+    });
+    setCompanies(await res.json());
+  };
+
+  const loadPlayers = async () => {
+    const res = await fetch('http://localhost:8000/admin/players', {
+      headers: { 'X-Admin-Password': adminAuth.getPassword()! }
+    });
+    const data = await res.json();
+    setPlayers(data.players);
+  };
+
+  const handleEdit = (company: any) => {
+    setEditingSymbol(company.symbol);
+    setEditData({ trend: company.trend, volatility: company.volatility, description: company.description });
+  };
+
+  const handleSave = async (symbol: string) => {
+    await fetch(`http://localhost:8000/admin/companies/${symbol}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Admin-Password': adminAuth.getPassword()!
+      },
+      body: JSON.stringify(editData)
+    });
+    setEditingSymbol(null);
+    loadCompanies();
+  };
+
+  const handleDelete = async (symbol: string) => {
+    if (confirm(`Delete ${symbol}? This cannot be undone.`)) {
+      await fetch(`http://localhost:8000/admin/companies/${symbol}`, {
+        method: 'DELETE',
+        headers: { 'X-Admin-Password': adminAuth.getPassword()! }
+      });
+      loadCompanies();
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-900 text-white p-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-4xl font-bold text-red-400">Admin Panel</h1>
+          <button onClick={() => { adminAuth.logout(); navigate('/'); }}
+                  className="bg-gray-700 px-4 py-2 rounded">
+            Logout
+          </button>
+        </div>
+
+        <TimestepControl onComplete={() => { loadCompanies(); loadPlayers(); }} />
+
+        <div className="mt-8">
+          <CompanyForm onSuccess={loadCompanies} />
+        </div>
+
+        <div className="mt-8 bg-gray-800 p-6 rounded">
+          <h2 className="text-2xl font-bold mb-4">Companies</h2>
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-gray-700">
+                <th className="text-left p-2">Symbol</th>
+                <th className="text-left p-2">Name</th>
+                <th className="text-left p-2">Initial Price</th>
+                <th className="text-left p-2">Trend</th>
+                <th className="text-left p-2">Volatility</th>
+                <th className="text-left p-2">Description</th>
+                <th className="text-left p-2">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {companies.map((c: any) => (
+                <tr key={c.symbol} className="border-b border-gray-700">
+                  <td className="p-2 font-mono">{c.symbol}</td>
+                  <td className="p-2">{c.name}</td>
+                  <td className="p-2">¢{c.initial_price.toFixed(2)}</td>
+                  <td className="p-2">
+                    {editingSymbol === c.symbol ? (
+                      <input type="number" step="0.01" value={editData.trend}
+                             onChange={e => setEditData({...editData, trend: parseFloat(e.target.value)})}
+                             className="w-20 bg-gray-700 px-2 py-1 rounded" />
+                    ) : c.trend.toFixed(2)}
+                  </td>
+                  <td className="p-2">
+                    {editingSymbol === c.symbol ? (
+                      <input type="number" step="0.01" value={editData.volatility}
+                             onChange={e => setEditData({...editData, volatility: parseFloat(e.target.value)})}
+                             className="w-20 bg-gray-700 px-2 py-1 rounded" />
+                    ) : c.volatility.toFixed(2)}
+                  </td>
+                  <td className="p-2 max-w-xs truncate">
+                    {editingSymbol === c.symbol ? (
+                      <input type="text" value={editData.description}
+                             onChange={e => setEditData({...editData, description: e.target.value})}
+                             className="w-full bg-gray-700 px-2 py-1 rounded" />
+                    ) : (c.description || 'N/A')}
+                  </td>
+                  <td className="p-2">
+                    {editingSymbol === c.symbol ? (
+                      <button onClick={() => handleSave(c.symbol)} className="text-green-400 mr-2">Save</button>
+                    ) : (
+                      <>
+                        <button onClick={() => handleEdit(c)} className="text-blue-400 mr-2">Edit</button>
+                        <button onClick={() => handleDelete(c.symbol)} className="text-red-400">Delete</button>
+                      </>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="mt-8 bg-gray-800 p-6 rounded">
+          <h2 className="text-2xl font-bold mb-4">Player Leaderboard</h2>
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-gray-700">
+                <th className="text-left p-2">Character</th>
+                <th className="text-left p-2">Portfolio Value</th>
+                <th className="text-left p-2">Cost Basis</th>
+                <th className="text-left p-2">P&L</th>
+                <th className="text-left p-2">P&L %</th>
+              </tr>
+            </thead>
+            <tbody>
+              {players.map((p: any) => (
+                <tr key={p.character_name} className="border-b border-gray-700">
+                  <td className="p-2 font-bold">{p.character_name}</td>
+                  <td className="p-2">¢{p.total_value.toFixed(2)}</td>
+                  <td className="p-2">¢{p.cost_basis.toFixed(2)}</td>
+                  <td className={`p-2 ${p.profit_loss >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                    ¢{p.profit_loss.toFixed(2)}
+                  </td>
+                  <td className={`p-2 ${p.profit_loss_pct >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                    {p.profit_loss_pct >= 0 ? '+' : ''}{p.profit_loss_pct.toFixed(2)}%
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+};
+```
+
+### frontend/src/components/admin/CompanyForm.tsx
+```typescript
+import React, { useState } from 'react';
+import { adminAuth } from '../../utils/adminAuth';
+
+export const CompanyForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
+  const [form, setForm] = useState({
+    symbol: '', name: '', initial_price: '100', trend: '0', volatility: '0.2', description: ''
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const res = await fetch('http://localhost:8000/admin/companies', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Admin-Password': adminAuth.getPassword()!
+      },
+      body: JSON.stringify({
+        symbol: form.symbol.toUpperCase(),
+        name: form.name,
+        initial_price: parseFloat(form.initial_price),
+        trend: parseFloat(form.trend),
+        volatility: parseFloat(form.volatility),
+        description: form.description
+      })
+    });
+
+    if (res.ok) {
+      alert('Company created!');
+      setForm({ symbol: '', name: '', initial_price: '100', trend: '0', volatility: '0.2', description: '' });
+      onSuccess();
+    } else {
+      alert('Error creating company');
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="bg-gray-800 p-6 rounded">
+      <h2 className="text-2xl font-bold mb-4">Create New Company</h2>
+      <div className="grid grid-cols-2 gap-4">
+        <input placeholder="Symbol (e.g., GLXT)" value={form.symbol}
+               onChange={e => setForm({...form, symbol: e.target.value})}
+               className="bg-gray-700 px-3 py-2 rounded" required />
+        <input placeholder="Company Name" value={form.name}
+               onChange={e => setForm({...form, name: e.target.value})}
+               className="bg-gray-700 px-3 py-2 rounded" required />
+        <input type="number" step="0.01" placeholder="Initial Price" value={form.initial_price}
+               onChange={e => setForm({...form, initial_price: e.target.value})}
+               className="bg-gray-700 px-3 py-2 rounded" required />
+        <input type="number" step="0.01" placeholder="Trend (-0.1 to 0.1)" value={form.trend}
+               onChange={e => setForm({...form, trend: e.target.value})}
+               className="bg-gray-700 px-3 py-2 rounded" required />
+        <input type="number" step="0.01" placeholder="Volatility (0.1 to 0.5)" value={form.volatility}
+               onChange={e => setForm({...form, volatility: e.target.value})}
+               className="bg-gray-700 px-3 py-2 rounded" required />
+      </div>
+      <textarea placeholder="Description (optional)" value={form.description}
+                onChange={e => setForm({...form, description: e.target.value})}
+                className="w-full bg-gray-700 px-3 py-2 rounded mt-4" rows={2} />
+      <button type="submit" className="mt-4 bg-red-600 px-6 py-2 rounded w-full">Create Company</button>
+    </form>
+  );
+};
+```
+
+### frontend/src/components/admin/TimestepControl.tsx
+```typescript
+import React, { useState } from 'react';
+import { adminAuth } from '../../utils/adminAuth';
+
+export const TimestepControl: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
+  const [showModal, setShowModal] = useState(false);
+  const [previews, setPreviews] = useState<any[]>([]);
+  const [overrides, setOverrides] = useState<Record<string, string>>({});
+
+  const loadPreview = async () => {
+    const res = await fetch('http://localhost:8000/admin/timestep/preview', {
+      headers: { 'X-Admin-Password': adminAuth.getPassword()! }
+    });
+    const data = await res.json();
+    setPreviews(data.previews);
+    setShowModal(true);
+  };
+
+  const handleGenerate = async () => {
+    const overrideMap: Record<string, number> = {};
+    Object.entries(overrides).forEach(([symbol, price]) => {
+      if (price !== '') overrideMap[symbol] = parseFloat(price);
+    });
+
+    await fetch('http://localhost:8000/admin/timestep/generate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Admin-Password': adminAuth.getPassword()!
+      },
+      body: JSON.stringify({ overrides: overrideMap })
+    });
+
+    alert('Timestep generated! Players should refresh their page.');
+    setShowModal(false);
+    setOverrides({});
+    onComplete();
+  };
+
+  return (
+    <div className="bg-gray-800 p-6 rounded">
+      <h2 className="text-2xl font-bold mb-4">Timestep Control</h2>
+      <button onClick={loadPreview} className="bg-yellow-600 px-6 py-3 rounded text-lg font-bold">
+        Generate New Timestep
+      </button>
+
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+          <div className="bg-gray-800 p-6 rounded max-w-4xl w-full max-h-screen overflow-y-auto">
+            <h3 className="text-2xl font-bold mb-4">Preview & Override Prices</h3>
+            <table className="w-full mb-4">
+              <thead>
+                <tr className="border-b border-gray-700">
+                  <th className="text-left p-2">Symbol</th>
+                  <th className="text-left p-2">Name</th>
+                  <th className="text-left p-2">Current</th>
+                  <th className="text-left p-2">Calculated</th>
+                  <th className="text-left p-2">Change %</th>
+                  <th className="text-left p-2">Override Price</th>
+                </tr>
+              </thead>
+              <tbody>
+                {previews.map(p => (
+                  <tr key={p.symbol} className="border-b border-gray-700">
+                    <td className="p-2 font-mono">{p.symbol}</td>
+                    <td className="p-2">{p.name}</td>
+                    <td className="p-2">¢{p.current_price.toFixed(2)}</td>
+                    <td className="p-2">¢{p.calculated_price.toFixed(2)}</td>
+                    <td className={`p-2 ${p.change_pct >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                      {p.change_pct >= 0 ? '+' : ''}{p.change_pct.toFixed(2)}%
+                    </td>
+                    <td className="p-2">
+                      <input type="number" step="0.01" placeholder="Optional"
+                             value={overrides[p.symbol] || ''}
+                             onChange={e => setOverrides({...overrides, [p.symbol]: e.target.value})}
+                             className="w-24 bg-gray-700 px-2 py-1 rounded" />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <div className="flex gap-4">
+              <button onClick={handleGenerate} className="bg-green-600 px-6 py-2 rounded">Confirm Generate</button>
+              <button onClick={() => setShowModal(false)} className="bg-gray-600 px-6 py-2 rounded">Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+```
+
+### frontend/src/App.tsx (add admin route)
+```typescript
+import { AdminPanel } from './pages/AdminPanel';
+
+// In your Routes:
+<Route path="/admin" element={<AdminPanel />} />
+```
+
+### Simple login page (optional)
+```typescript
+// frontend/src/pages/AdminLogin.tsx
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { adminAuth } from '../utils/adminAuth';
+
+export const AdminLogin: React.FC = () => {
+  const [password, setPassword] = useState('');
+  const navigate = useNavigate();
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (adminAuth.login(password)) {
+      navigate('/admin');
+    } else {
+      alert('Invalid password');
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+      <form onSubmit={handleSubmit} className="bg-gray-800 p-8 rounded">
+        <h1 className="text-2xl font-bold text-red-400 mb-4">Admin Login</h1>
+        <input type="password" placeholder="Password" value={password}
+               onChange={e => setPassword(e.target.value)}
+               className="w-full bg-gray-700 px-4 py-2 rounded mb-4" />
+        <button type="submit" className="w-full bg-red-600 px-4 py-2 rounded">Login</button>
+      </form>
+    </div>
+  );
+};
+```
+
+## TESTING CHECKLIST
+
+Backend:
+[ ] POST /admin/verify returns true for correct password
+[ ] GET /admin/companies returns JSON array
+[ ] POST /admin/companies creates new company
+[ ] PATCH /admin/companies/{symbol} updates trend/volatility
+[ ] GET /admin/timestep/preview returns calculated prices
+[ ] POST /admin/timestep/generate creates new timestep
+[ ] POST /admin/timestep/generate with overrides uses custom prices
+[ ] GET /admin/players returns all characters with P&L
+
+Frontend:
+[ ] /admin route loads admin panel (or redirects to /admin/login)
+[ ] Can create new company via form
+[ ] Companies table shows all companies from JSON
+[ ] Can edit trend/volatility inline
+[ ] Generate timestep button opens modal
+[ ] Modal shows price preview with % change
+[ ] Can override prices in modal
+[ ] Confirm generates timestep
+[ ] Player leaderboard shows sorted by P&L
+[ ] Logout clears localStorage and redirects
+
+Integration:
+[ ] New companies appear in player market view after refresh
+[ ] Generated timesteps update player prices after refresh
+[ ] Player stats reflect current holdings accurately
+
+## DEPLOYMENT NOTES
+
+Change admin password via environment variable:
+```bash
+export ADMIN_PASSWORD="your-secret-password"
+```
+
+Or hardcode in backend/admin_routes.py line 10.
+
+Companies JSON is version-controlled and backed up automatically via git.
+No database migrations needed for company changes.

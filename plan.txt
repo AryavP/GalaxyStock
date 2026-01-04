@@ -1,0 +1,250 @@
+# GalacticStocks - D&D Campaign Stock Market Simulator
+
+## Context
+A galactic stock market simulator for a D&D campaign with fictitious companies (Apollo ISR, Elysium Planetary Acquisitions, etc.). The market is stochastic but responsive to game master inputs. Party members can trade stocks and track portfolios.
+
+## Core Requirements
+
+### Stock Price Simulation
+- Python-based timeseries generator
+- Stochastic price movement based on:
+  - Current trend (slope)
+  - Volatility
+  - Initial price
+- All parameters loaded from Google Sheet
+- Stateful: remembers all historical prices, generates new timesteps on demand
+- GM can trigger new timestep generation
+- GM can override stock prices for specific companies
+
+### Data Persistence
+- Store complete price history (all timesteps)
+- Store party member portfolios (character name, holdings, purchase history)
+- Store transaction log for GM verification
+- Use SQLite or simple JSON files for local persistence
+
+### Game Master Controls
+- Generate new timestep via command/endpoint
+- Override stock prices via Google Sheet
+- View all transactions/purchase log
+- Access to full market state
+
+### Party Member Features
+- View portfolio with:
+  - Current holdings (symbol, quantity, avg purchase price)
+  - Current value of each position
+  - Total portfolio value
+  - Total profit/loss from principal
+- Buy stocks:
+  - Select company and quantity
+  - Display total cost before confirmation
+  - Confirm purchase to add to portfolio
+  - **Note:** No cash balance system - party members follow purchase limits on honor system
+- Sell stocks:
+  - Select company from holdings and quantity to sell
+  - Display total proceeds before confirmation
+  - Confirm sale to remove from portfolio and realize gains/losses
+  - Uses average cost basis for P/L calculations
+- View market:
+  - Filter by company to see timeseries chart
+  - View all companies and current prices
+  - See historical performance
+  - Real-time updates via WebSocket when GM generates new timestep
+
+## Technical Implementation Plan
+
+### Phase 1: Backend Setup (Python)
+
+#### 1.1 Google Sheets Integration
+- Set up Google Sheets API credentials
+- Create sheet structure:
+  - Companies tab: symbol, name, initial_price, trend, volatility
+  - Overrides tab: symbol, override_price, timestamp (GM use)
+- Implement read functionality for company parameters
+- Implement read functionality for price overrides
+- **Load timing:** Reload data from Google Sheets on:
+  - Server startup
+  - Every timestep generation (to check for GM overrides and parameter updates)
+
+#### 1.2 Stock Price Simulation Engine
+- Create StockMarket class with:
+  - load_companies() - from Google Sheet
+  - generate_timestep() - creates new prices for all stocks
+  - get_price_history(symbol, n_periods) - retrieve historical data
+  - apply_override(symbol, price) - GM price override
+- Price generation algorithm:
+  - Use geometric Brownian motion or similar stochastic process
+  - Apply trend (drift) and volatility parameters
+  - Check for GM overrides before generating
+- Save state after each timestep
+- **Concurrency protection:** Implement lock/flag to prevent concurrent timestep generation
+  - Use threading.Lock or async lock to ensure only one timestep generates at a time
+  - Return error if generation already in progress
+
+#### 1.3 Data Storage
+- Design schema:
+  - stock_prices: symbol, timestamp, price, timestep_number
+  - portfolios: character_name, symbol, quantity, avg_purchase_price
+  - transactions: id, character_name, symbol, transaction_type (BUY/SELL), quantity, price, total_amount, timestamp
+  - market_state: current_timestep, last_updated
+- Implement SQLite database with these tables
+- Create data access layer (functions to read/write)
+
+#### 1.4 API Server
+- Flask or FastAPI web server
+- Endpoints:
+  - GET /api/market - get all current stock prices
+  - GET /api/market/:symbol/history - get price history for a stock
+  - GET /api/portfolio/:character - get portfolio for character
+  - POST /api/transaction/buy - buy stock (character, symbol, quantity)
+  - POST /api/transaction/sell - sell stock (character, symbol, quantity)
+  - POST /api/admin/timestep - generate new timestep (GM only)
+  - GET /api/admin/transactions - view all transactions (GM only)
+- Transaction validation:
+  - Buy: calculate total cost, update avg_purchase_price, log transaction
+  - Sell: verify character owns enough shares, calculate proceeds using avg cost basis, update portfolio, log transaction
+- **WebSocket support:**
+  - WebSocket endpoint for real-time updates
+  - Broadcast timestep_updated event to all connected clients when GM generates new timestep
+  - Include new timestep number and updated prices in broadcast
+- CORS enabled for local development
+
+### Phase 2: Frontend (Web App)
+
+#### 2.1 Project Setup
+- React with Vite + TypeScript
+- Tailwind CSS for dark, sleek UI
+- Chart.js or Recharts for timeseries visualization
+- Axios for API calls
+- WebSocket client library (native WebSocket API or socket.io-client) for real-time updates
+
+#### 2.2 UI Components
+- LoginScreen: Simple character name input (no auth)
+- Header/Navigation:
+  - Display current timestep number (e.g., "Market Day 42")
+  - Visual indicator when new timestep is received
+  - Character name display
+- Portfolio Dashboard:
+  - Summary card: total value, total invested, profit/loss (with color coding)
+  - Holdings table: symbol, quantity, avg price, current price, value, P/L, [Buy More] [Sell] buttons
+- Stock Transaction Modals:
+  - Buy Modal:
+    - Company selector dropdown
+    - Quantity input
+    - Display: current price, total cost
+    - Confirm/Cancel buttons
+  - Sell Modal:
+    - Pre-filled with selected stock from portfolio
+    - Quantity input (max: current holdings)
+    - Display: current price, total proceeds, realized gain/loss
+    - Confirm/Cancel buttons
+- Market View:
+  - Company filter/search
+  - Timeseries chart for selected company
+  - Current prices table for all stocks with [Buy] button
+- Dark theme with sci-fi aesthetic (think space/galactic theme)
+
+#### 2.3 State Management
+- Use React Context or simple useState
+- Store: current character, portfolio, market data, selected stock, current timestep number
+- **Real-time updates via WebSocket:**
+  - Connect to WebSocket on login
+  - Listen for timestep_updated events
+  - Auto-refresh market data and portfolio when new timestep is broadcast
+  - Display current timestep number in UI header
+  - Show notification/indicator when market updates
+
+#### 2.4 Pages/Routes
+- / - Login (character name entry)
+- /dashboard - Portfolio view
+- /market - Browse all stocks and charts
+- /trade - Buy/Sell stock modal/page
+
+### Phase 3: GM Interface
+
+#### 3.1 Admin Dashboard (separate page or CLI)
+- Button/command to generate new timestep
+- View current market state (timestep number, last updated)
+- Transaction log viewer (filterable by character, stock, date, type: buy/sell)
+- Summary stats: total trades, most active trader, most traded stock
+- Link to Google Sheet for overrides
+
+#### 3.2 Google Sheet as Control Panel
+- Companies sheet (read-only for GM, defines market params)
+- Overrides sheet (GM can add rows to force price changes)
+- Instructions tab explaining how to use
+
+### Phase 4: Testing & Deployment
+
+#### 4.1 Testing
+- Test price generation algorithm produces realistic movements
+- Test state persistence across server restarts
+- Test portfolio calculations are accurate
+- Test buy flow end-to-end
+- Test sell flow end-to-end (including edge cases: selling more than owned, selling partial positions)
+- Test transaction log accuracy
+- Manual testing with multiple characters
+
+#### 4.2 Deployment
+- Backend: Run Flask/FastAPI on local server or free tier cloud (Railway, Render)
+- Frontend: Deploy to Vercel or Netlify
+- Database: SQLite file stored with backend or upgrade to PostgreSQL if needed
+- Share URL with party members
+
+## File Structure
+```
+GalacticStocks/
+├── backend/
+│   ├── main.py                 # FastAPI app
+│   ├── stock_simulator.py      # Price generation logic
+│   ├── database.py             # SQLite interface
+│   ├── google_sheets.py        # Google Sheets API client
+│   ├── models.py               # Data models
+│   ├── requirements.txt        # Python dependencies
+│   └── galactic_market.db      # SQLite database (gitignored)
+├── frontend/
+│   ├── src/
+│   │   ├── components/         # React components
+│   │   ├── pages/              # Page components
+│   │   ├── api/                # API client
+│   │   ├── App.tsx
+│   │   └── main.tsx
+│   ├── package.json
+│   └── index.html
+├── .env                        # Google Sheets credentials
+└── README.md
+```
+
+## Implementation Order
+1. Set up Google Sheets with company data
+2. Build stock simulation engine and test locally
+3. Implement database and state persistence
+4. Create API server with buy/sell endpoints
+5. Build frontend UI components (including both buy and sell modals)
+6. Integrate frontend with backend
+7. Add GM admin features
+8. Test with sample data (including buy/sell scenarios)
+9. Deploy and share with party
+
+## Success Criteria
+- Stock prices generate realistically with stochastic variation
+- State persists across restarts (no data loss)
+- GM can override prices and generate timesteps
+- Concurrent timestep generation prevented by lock mechanism
+- Google Sheets data loaded on startup and every timestep generation
+- Party members can view portfolios, buy stocks, and sell stocks
+- Sell validation prevents selling more shares than owned
+- Portfolio uses average cost basis for P/L calculations
+- All transactions (buy and sell) logged for verification
+- WebSocket broadcasts timestep updates to all connected clients in real-time
+- UI displays current timestep number
+- UI is clean, dark, and easy to use
+- System handles 4-8 concurrent party members
+
+## Future Enhancements (Optional)
+- Stock news/events flavor text generated for major price moves
+- Dividend payments on certain stocks
+- Portfolio performance charts over time
+- "Insider tips" feature where GM can hint at future movements
+- Mobile-responsive design
+- Short selling functionality
+- Limit orders and stop-loss orders
