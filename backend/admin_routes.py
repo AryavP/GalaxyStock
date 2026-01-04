@@ -14,7 +14,7 @@ from models import StockPrice
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/admin", tags=["admin"])
+router = APIRouter(prefix="/api/admin", tags=["admin"])
 
 # Simple password auth - no JWT, no bcrypt for D&D campaign simplicity
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "galacticstocks123")
