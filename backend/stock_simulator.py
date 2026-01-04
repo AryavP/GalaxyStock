@@ -144,6 +144,28 @@ class StockMarket:
 
         return new_price
 
+    def calculate_next_price(
+        self,
+        symbol: str,
+        trend: float,
+        volatility: float,
+        current_price: float
+    ) -> float:
+        """Calculate what the next price would be for a stock.
+
+        This is a public wrapper around _generate_price for use by admin panel.
+
+        Args:
+            symbol: Stock symbol (for logging)
+            trend: Drift parameter
+            volatility: Volatility parameter
+            current_price: Current stock price
+
+        Returns:
+            Calculated next price
+        """
+        return self._generate_price(current_price, trend, volatility)
+
     def generate_timestep(self) -> MarketState:
         """Generate a new market timestep with updated prices for all stocks.
 
@@ -298,7 +320,14 @@ class StockMarket:
             - companies: Dict of symbol -> company info
         """
         market_state = self.db.get_market_state()
-        prices = self.get_current_prices()
+        all_prices = self.get_current_prices()
+
+        # Filter prices to only include companies that are currently defined
+        prices = {
+            symbol: price
+            for symbol, price in all_prices.items()
+            if symbol in self.companies
+        }
 
         companies_info = {
             symbol: {

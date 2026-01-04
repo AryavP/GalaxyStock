@@ -8,6 +8,8 @@ import { Header } from './components/Header';
 import { Login } from './components/Login';
 import { Portfolio } from './pages/Portfolio';
 import { Market } from './pages/Market';
+import { AdminLogin } from './pages/AdminLogin';
+import { AdminPanel } from './pages/AdminPanel';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { characterName } = useApp();
@@ -53,6 +55,8 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin" element={<AdminPanel />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

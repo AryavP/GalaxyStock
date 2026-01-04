@@ -6,6 +6,8 @@ import logging
 from typing import List, Optional
 from datetime import datetime
 import os
+import json
+from pathlib import Path
 
 try:
     from google.oauth2.service_account import Credentials
@@ -231,51 +233,40 @@ class MockGoogleSheetsClient(GoogleSheetsClient):
         return True
 
     def load_companies(self) -> List[Company]:
-        """Return sample company data.
+        """Load company data from companies.json file.
 
         Returns:
-            List of sample Company objects
+            List of Company objects from companies.json
         """
-        companies = [
-            Company(
-                symbol="APLO",
-                name="Apollo ISR",
-                initial_price=100.0,
-                trend=0.001,
-                volatility=0.02
-            ),
-            Company(
-                symbol="ELYP",
-                name="Elysium Planetary Acquisitions",
-                initial_price=75.0,
-                trend=0.002,
-                volatility=0.025
-            ),
-            Company(
-                symbol="NOVA",
-                name="Nova Mining Consortium",
-                initial_price=50.0,
-                trend=-0.001,
-                volatility=0.03
-            ),
-            Company(
-                symbol="ZETA",
-                name="Zeta Transport Co.",
-                initial_price=120.0,
-                trend=0.0015,
-                volatility=0.015
-            ),
-            Company(
-                symbol="TITA",
-                name="Titan Defense Industries",
-                initial_price=200.0,
-                trend=0.0005,
-                volatility=0.01
-            )
-        ]
+        try:
+            # Get the path to companies.json relative to this file
+            backend_dir = Path(__file__).parent
+            companies_file = backend_dir / "companies.json"
 
-        logger.info(f"Loaded {len(companies)} mock companies")
-        return companies
+            if not companies_file.exists():
+                logger.error(f"companies.json not found at {companies_file}")
+                return []
+
+            with open(companies_file, 'r') as f:
+                data = json.load(f)
+
+            companies = []
+            for company_data in data:
+                company = Company(
+                    symbol=company_data['symbol'],
+                    name=company_data['name'],
+                    initial_price=company_data['initial_price'],
+                    trend=company_data['trend'],
+                    volatility=company_data['volatility']
+                )
+                companies.append(company)
+
+            logger.info(f"Loaded {len(companies)} companies from companies.json")
+            return companies
+
+        except Exception as e:
+            logger.error(f"Error loading companies from companies.json: {e}")
+            return []
 
     def load_price_overrides(self) -> List[PriceOverride]:
         """Return empty overrides list for mock.

@@ -16,6 +16,8 @@ from database import Database
 from stock_simulator import StockMarket
 from google_sheets import GoogleSheetsClient, MockGoogleSheetsClient
 from models import TransactionType, PortfolioHolding, Transaction
+from admin_routes import router as admin_router
+import admin_routes
 
 # Configure logging
 logging.basicConfig(
@@ -156,6 +158,10 @@ async def lifespan(app: FastAPI):
     # Initialize market
     market = StockMarket(db, sheets_client)
 
+    # Inject dependencies into admin routes
+    admin_routes.db_instance = db
+    admin_routes.market_instance = market
+
     # Initialize market with starting prices if needed
     try:
         market_state = db.get_market_state()
@@ -200,6 +206,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Mount admin router
+app.include_router(admin_router)
 
 
 # REST API Endpoints
