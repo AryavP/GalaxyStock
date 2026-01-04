@@ -5,6 +5,7 @@
 export interface Company {
   symbol: string;
   name: string;
+  description?: string;
 }
 
 export interface StockPrice {

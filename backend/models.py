@@ -22,6 +22,7 @@ class Company:
     initial_price: float
     trend: float  # Drift parameter for price movement
     volatility: float  # Volatility parameter for stochastic variation
+    description: str = ""  # Company description for tooltips
 
     def __post_init__(self):
         """Validate company parameters."""

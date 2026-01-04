@@ -332,7 +332,8 @@ class StockMarket:
         companies_info = {
             symbol: {
                 "name": company.name,
-                "symbol": company.symbol
+                "symbol": company.symbol,
+                "description": company.description
             }
             for symbol, company in self.companies.items()
         }

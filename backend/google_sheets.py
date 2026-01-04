@@ -257,7 +257,8 @@ class MockGoogleSheetsClient(GoogleSheetsClient):
                     name=company_data['name'],
                     initial_price=company_data['initial_price'],
                     trend=company_data['trend'],
-                    volatility=company_data['volatility']
+                    volatility=company_data['volatility'],
+                    description=company_data.get('description', '')
                 )
                 companies.append(company)
 

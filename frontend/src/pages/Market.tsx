@@ -102,7 +102,12 @@ export const Market: React.FC = () => {
                     <div className="font-bold text-white">{stock.symbol}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-gray-300">{stock.name}</div>
+                    <div
+                      className="text-gray-300"
+                      title={marketData?.companies[stock.symbol]?.description || ''}
+                    >
+                      {stock.name}
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right">
                     <div className="text-lg font-bold text-stellar-cyan">
