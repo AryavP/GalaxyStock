@@ -1,0 +1,258 @@
+[
+  {
+    "symbol": "APOL",
+    "name": "Apollo ISR",
+    "initial_price": 1850.0,
+    "trend": 0.0175,
+    "volatility": 0.0113,
+    "description": "Mega Corp/Ship Registry - One of, if not the most powerful corporations in the Galaxy. Specializing in ship registration, tracking, manufacturing, and R&D. Apollo ISR is a long-standing, impartial, third-party galactic organization that manages all data related to the massive number of starships present in the galaxy"
+  },
+  {
+    "symbol": "DOLI",
+    "name": "Dolis Cybernetics",
+    "initial_price": 950.0,
+    "trend": 0.0037,
+    "volatility": 0.006,
+    "description": "Droid Manufacturer - Once the leading droid and android manufacturer in the galaxy, they were the only company to maintain an independent contract with the Incorporated Ameristanian Republic during the reign of the Dread Emperor Augustus Jeffs Albert. They are most known as the creators of the S.M.I.L.E Bots (Singularity Motivated Intelligence Locus Type E)"
+  },
+  {
+    "symbol": "SARA",
+    "name": "Sa\u2019rai Merchant Corporation",
+    "initial_price": 680.0,
+    "trend": -0.0019,
+    "volatility": 0.004699999999999999,
+    "description": "Trade Conglomerate - Known to most of the civilized Multiverse as The Merchants, the Sa'rai are a private, non-affiliated fleet of ships that carries imports and exports during times of peace, but may become a spacefaring auxiliary to its chosen faction during wartime, delivering troops (including many Sa'rai sailors), supplies and munitions between systems. The Merchants are a worker-owned operation, with management, mechanics, maintenance and crewmembers receiving shares in both the company and in individual hauls."
+  },
+  {
+    "symbol": "WBGE",
+    "name": "Wethern-Bancroft Genomics",
+    "initial_price": 850.0,
+    "trend": -0.0015,
+    "volatility": 0.011200000000000002,
+    "description": "Body Augmentations Manufacturer - A small Body Augmentation company known as one of the leading non Arcadian implant manufacterors"
+  },
+  {
+    "symbol": "TECH",
+    "name": "Technomancer Inc.",
+    "initial_price": 420.0,
+    "trend": 0.0039000000000000003,
+    "volatility": 0.0023,
+    "description": "Cybernetic Implant Manufacrurer - A body enhancement company, focusing on neural implants that expand mental processes by ostensibly hooking your brain up to microchipped ram and data storage. They are most famous for their line of Aarcane \u2122 implants, implants that allow the user to remotely access unencrypted data through directly streamed into their internal data systems, then easily accessible by their higher brain functions."
+  },
+  {
+    "symbol": "KKWZ",
+    "name": "Kaleidoscope Kinetic Weapons",
+    "initial_price": 300.0,
+    "trend": 0.005,
+    "volatility": 0.0070999999999999995,
+    "description": "Weapons Manufacturer - They make good guns. Shoot far, big boom."
+  },
+  {
+    "symbol": "ELYS",
+    "name": "Elysian Planet Acquisition",
+    "initial_price": 1650.0,
+    "trend": 0.0068000000000000005,
+    "volatility": 0.0128,
+    "description": "Mega Corp/Landowners - One of the major galactic players, their primary buisiness is, put simply, being landlords on a planetary scale. After the fall of the Dread Dictator, EPA quickly rose in prominance and power, purchasing and \"purchasing\" planets for cheap, ammasing an immense supply of natural resourses and land."
+  },
+  {
+    "symbol": "AMNO",
+    "name": "The Amano Group",
+    "initial_price": 1750.0,
+    "trend": 0.01,
+    "volatility": 0.0036,
+    "description": "Mega Corp - The primary focus of The Amano Group lies in android production, a lucrative enterprise that forms the backbone of their vast wealth and influence, But they produce just about everything, one the last major corpo dynasties, a major galactic player."
+  },
+  {
+    "symbol": "ARCA",
+    "name": "Arcadian Androids",
+    "initial_price": 680.0,
+    "trend": 0.004699999999999999,
+    "volatility": 0.0173,
+    "description": "Droid Manufacturer - A Subsidiary of The Amano Synthetics Division, which is a subsidiary of The Amono Group. The primary droid and Android production for the Amano Group. Arcadian Androids we're purchased about 2 years ago in a play by the Amano Group to expand beyond their sector and be a galaxy wide shareholder."
+  },
+  {
+    "symbol": "VIHO",
+    "name": "Vidikov-Holtz",
+    "initial_price": 1100.0,
+    "trend": 0.0034000000000000002,
+    "volatility": 0.0132,
+    "description": "Ship Manufacturer - A leading manufacturer of ships and ship parts with ship nurseries and branches all over the galaxy."
+  },
+  {
+    "symbol": "GAEL",
+    "name": "Galactic Electric",
+    "initial_price": 680.0,
+    "trend": 0.0009,
+    "volatility": 0.0039000000000000003,
+    "description": "Power Company - A morally flexible energy conglomerate that specializes in harvesting \"alternative energy sources\"\u2014which often translates to \"things that definitely shouldn\u2019t be used as fuel.\""
+  },
+  {
+    "symbol": "PCOG",
+    "name": "PreCog Commerce",
+    "initial_price": 300.0,
+    "trend": 0.0022,
+    "volatility": 0.0075,
+    "description": "Predictive AI & Data Exploitation - Overmind Analytics collects, analyzes, and monetizes everything. From consumer behavior to war predictions, they deal in pre-emptive decision-making."
+  },
+  {
+    "symbol": "AUGS",
+    "name": "Aurora Geomantic Solution",
+    "initial_price": 280.0,
+    "trend": -0.013000000000000001,
+    "volatility": 0.013999999999999999,
+    "description": "Ethical Mining & Terraforming Consortium - Unlike most mining corporations that strip planets down to bare rock, AGS specializes in eco-friendly mineral extraction\u2014at least, that\u2019s what the brochures say. Their proprietary GeoWeave\u2122 tech supposedly restores planetary ecosystems while extracting rare elements, though results have varied (one planet grew an entirely new jungle, another collapsed into a methane swamp). Despite their shady scientific claims, AGS remains wildly popular with wealthy planets looking for a more PR-friendly approach to mining."
+  },
+  {
+    "symbol": "OVMC",
+    "name": "Ovtarian Mining Co.",
+    "initial_price": 420.0,
+    "trend": 0.0039000000000000003,
+    "volatility": 0.017,
+    "description": "Mining Company - Famous for their \"Just drill to the fucking center of this planet\" approach to mining. They dont leave a planet till it ceases to exist."
+  },
+  {
+    "symbol": "BABX",
+    "name": "Babylon Exports Incorporated",
+    "initial_price": 680.0,
+    "trend": 0.002,
+    "volatility": 0.0124,
+    "description": "Shipping and Raw Materials - A Babylon based small scale shipping conglomerate."
+  },
+  {
+    "symbol": "DFTB",
+    "name": "Demeter FreeTrade Banking",
+    "initial_price": 145.0,
+    "trend": 0.0007000000000000001,
+    "volatility": 0.0118,
+    "description": "Off Planet Banking - Speclizing in hiding your money from the authorities"
+  },
+  {
+    "symbol": "AUTX",
+    "name": "Automatronix, LLC",
+    "initial_price": 420.0,
+    "trend": 0.0024,
+    "volatility": 0.0073,
+    "description": "Droid Manufacturer - A budget-tier droid manufacturer, Automatronix is known for cheaply produced, poorly regulated robots that barely meet safety standards. Their AI programming is based on scavenged code from long-forgotten war machines, glitchy personal assistants, and one suspiciously aggressive Tamagotchi."
+  },
+  {
+    "symbol": "GKVC",
+    "name": "Grizwald and Krumm Voidcraft",
+    "initial_price": 1050.0,
+    "trend": 0.0046,
+    "volatility": 0.019,
+    "description": "Ship Manufacturer - High tier, expensive, and elite, starship manufacturor, supplying the galaxies most elite armadas."
+  },
+  {
+    "symbol": "PBSA",
+    "name": "Pretty Boy Shield and Accessories",
+    "initial_price": 95.0,
+    "trend": 0.01,
+    "volatility": 0.0049,
+    "description": "Combat Tech Manufacturer - A small Demeter based gear company - now repressented by Munk's Hunks"
+  },
+  {
+    "symbol": "WSAA",
+    "name": "Wex and Sons Applied Armaments",
+    "initial_price": 95.0,
+    "trend": -0.0007000000000000001,
+    "volatility": 0.0032,
+    "description": "Weapons Manufacturing - A small Demeter based Weapons company"
+  },
+  {
+    "symbol": "FLUX",
+    "name": "Flux-Sterling Media",
+    "initial_price": 680.0,
+    "trend": -0.0018,
+    "volatility": 0.0087,
+    "description": "Media Conglomerate - Large, but declining, media company, most famous for being the producers and distributers for \"The untamed Galaxy with Buck Callahan\""
+  },
+  {
+    "symbol": "BLLC",
+    "name": "Bellatrix Cleans!",
+    "initial_price": 145.0,
+    "trend": 0.0002,
+    "volatility": 0.0013,
+    "description": "Cleaning Services - Bellatrix Station based cleaning company."
+  },
+  {
+    "symbol": "IHLD",
+    "name": "Impiato Hion Lightspeed Drives",
+    "initial_price": 420.0,
+    "trend": -0.0023,
+    "volatility": 0.0138,
+    "description": "Grav Drive Manufaturer - Mid tier Gravity drive manufacturors."
+  },
+  {
+    "symbol": "VOSS",
+    "name": "Voss Industries",
+    "initial_price": 850.0,
+    "trend": 0.0021,
+    "volatility": 0.0102,
+    "description": "Agri Manufacturor - One of the leading manufacturors of bio engineered agri-products, famous for things like Grav Honey, Micro-corn, and Mega-corn."
+  },
+  {
+    "symbol": "SLOP",
+    "name": "SlopBars LTD.",
+    "initial_price": 185.0,
+    "trend": 0.0012,
+    "volatility": 0.0034000000000000002,
+    "description": "Snack Maker - You know what it is."
+  },
+  {
+    "symbol": "BCSD",
+    "name": "Blue Comet Soft-Drinks",
+    "initial_price": 185.0,
+    "trend": 0.004,
+    "volatility": 0.0007000000000000001,
+    "description": "Soft Drink Maker - Slurp down a Blue Comet, Death of a Star XTREME gushing slurp pouch today"
+  },
+  {
+    "symbol": "HOLY",
+    "name": "Holy Sisters of the Infinite and Terrible Void",
+    "initial_price": 250.0,
+    "trend": 0.0009,
+    "volatility": 0.0076,
+    "description": "Void Worship/Drug Maufacturer - Of the myriad religions in the known Universe, the Holy Sisters of the Infinite and Terrible Void is the only one with no splinter factions, hence, it is easily definable by its own tenets which are as follows: 1) God is a Paradox; Ever present and never there when you need Her, 2) Non-participation is the better part of action, 3) If the pond is illusion, then what are the ripples? 4) All things come to she who waits\u2026 and waits\u2026and waits, 5) Confuse Karma; stand quite still and think of nothing."
+  },
+  {
+    "symbol": "NTAS",
+    "name": "Church of the Ninth Tone Ascendancy",
+    "initial_price": 250.0,
+    "trend": -0.0023,
+    "volatility": 0.0168,
+    "description": "Worshippers of the Bell/Gizmos - Worshipers of the holy octive, and large scale gizmo and doodad makers."
+  },
+  {
+    "symbol": "FGFD",
+    "name": "The Fredric-Grafter Federation",
+    "initial_price": 680.0,
+    "trend": 0.0023,
+    "volatility": 0.0098,
+    "description": "Research Organization - The Federation is a union of research teams, backed by immense teams and facilities all spread over a handful of worlds on the outskirts of the Daphda Traverse. Though they are not technically a government, nor do they have citizens, they do maintain complete private control of their worlds, and maintain strict regulations on the comings and goings of their corner of the Daphda."
+  },
+  {
+    "symbol": "OOBO",
+    "name": "Ooga Boogo Inc.",
+    "initial_price": 42.0,
+    "trend": -0.0036,
+    "volatility": 0.0177,
+    "description": "Ooga/Booga - Ooga Booga Boo"
+  },
+  {
+    "symbol": "FFFF",
+    "name": "Fire Frank Fitz\u2019s Empire",
+    "initial_price": 320.0,
+    "trend": 0.0028000000000000004,
+    "volatility": 0.008,
+    "description": "Smuggling Empire - The Empire of the greatest pirate ever to cross the void. His empire has its hands in many different industries, but made its start smuggling \"illicit\" substances."
+  },
+  {
+    "symbol": "HMAG",
+    "name": "Her Majesties Goodies",
+    "initial_price": 680.0,
+    "trend": -0.0026,
+    "volatility": 0.0177,
+    "description": "Trade Conglomerate - General Exporter of Delphine locally maufactured products"
+  }
+]
