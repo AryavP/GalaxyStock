@@ -26,7 +26,7 @@ export const Login: React.FC = () => {
           <div className="flex justify-center mb-4">
             <Rocket className="w-16 h-16 text-stellar-cyan" />
           </div>
-          <h1 className="text-4xl font-bold text-white mb-2">GalacticStocks</h1>
+          <h1 className="text-4xl font-bold text-white mb-2">StandardUseInterface</h1>
           <p className="text-gray-400">Galactic Stock Market Simulator</p>
         </div>
 

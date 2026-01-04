@@ -38,7 +38,7 @@ export const Header: React.FC = () => {
           {/* Logo */}
           <Link to="/dashboard" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
             <Rocket className="w-8 h-8 text-stellar-cyan" />
-            <span className="text-xl font-bold text-white">GalacticStocks</span>
+            <span className="text-xl font-bold text-white">StandardUseInterface</span>
           </Link>
 
           {/* Navigation */}
