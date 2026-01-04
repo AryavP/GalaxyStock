@@ -230,6 +230,12 @@ async def root():
     }
 
 
+@app.get("/health")
+async def health():
+    """Health check endpoint for Railway."""
+    return {"status": "healthy", "service": "GalacticStocks"}
+
+
 @app.get("/api/market", response_model=MarketResponse)
 async def get_market():
     """Get current market state with all stock prices.
