@@ -142,8 +142,14 @@ async def lifespan(app: FastAPI):
 
     logger.info("Starting GalacticStocks server...")
 
-    # Initialize database
-    db = Database("galactic_market.db")
+    # Initialize database with path that supports Railway volumes
+    # Use /app/data if it exists (Railway volume), otherwise local directory
+    import os
+    db_dir = "/app/data" if os.path.exists("/app/data") else "."
+    db_path = os.path.join(db_dir, "galactic_market.db")
+    logger.info(f"Using database path: {db_path}")
+
+    db = Database(db_path)
 
     # Initialize Google Sheets client (or mock)
     try:
